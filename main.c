@@ -5,5 +5,5 @@
 
 void main() {
 	SetConsoleTitle(L"Cookies Ordering System");
-	orderCookies();
+	mainMenu();
 }
