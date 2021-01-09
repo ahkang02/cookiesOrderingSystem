@@ -3,10 +3,11 @@
 #include <time.h>
 #include <ctype.h>
 #pragma warning (disable:4996)
-#define LUV_LETTER 25
-#define NUT_COOKIES 20
-#define ASST_COOKIES 15
-
+#define LUV_LETTER 25.00
+#define NUT_COOKIES 20.00
+#define ASST_COOKIES 15.00
+#define discountI 0.05
+#define discountII 0.10
 void menu();
 void cookiesFact();
 void orderCookies();
@@ -45,12 +46,15 @@ void endingScreenMsg() {
 	printf("\t\t\t     Thank You For Using This System\n");
 	printf("\t\t\t          For Further Feedback \n");
 	printf("\t\t\t             Please Contact\n");
-	printf("\t\t\t       <Zhi Hong> AT <+60102012687>\n");
+	printf("\t\t\t       <Admin> AT <+60123456789>\n");
 	printf("\t\t\t=========================================\n");
 }
 
-void thankYouMsg() {
+void thankYouMsg(FILE** receiptPTR) {
 	printf("Thank You For Your Order.\nPlease bring this Order Note when collecting your cookies. :-)\n");
+	fprintf(*receiptPTR, "Thank You For Your Order.\nPlease bring this Order Note when collecting your cookies. :-)\n");
+	printf("============================================================================\n");
+	fprintf(*receiptPTR, "============================================================================\n");
 }
 
 int randNum() {
@@ -58,6 +62,97 @@ int randNum() {
 	srand(time(NULL));
 	randomNumber = rand() % 10 + 1;
 	return randomNumber;
+}
+
+void receipt(int orderNumber, int luvLetter, int  nutKies, int asstKies, float subTotal, float discountedPrice, float amountToPay, float deposit, float grandTotal) {
+
+	FILE* receiptPTR;
+
+	time_t rawtime;
+	struct tm* timeinfo;
+	char buffer[80];
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+	strftime(buffer, 80, "\t                Order Date: %d %b %Y\n", timeinfo);
+
+	receiptPTR = fopen("Receipt.txt", "a");
+
+	if (receiptPTR == NULL) {
+		printf("Unable to open file");
+		exit(-1);
+	}
+
+	printf("============================================================================\n");
+	printf("TARUC FESTIVE COOKIES SDN BHD\t\tPhone     :  0123456789\n");
+	printf("\tORDER NOTE");
+	printf(buffer);
+	printf("Your Order No is:	%d\t\tReady in 4 days.\n", orderNumber);
+	printf("%2d   LOVE LETTERS @ RM25.00 per tin: RM%9.2f\n", luvLetter, luvLetter * LUV_LETTER);
+	printf("%2d    NUT COOKIES @ RM20.00 per tin: RM%9.2f\n", nutKies, nutKies * NUT_COOKIES);
+	printf("%2d   ASST COOKIES @ RM15.00 per tin: RM%9.2f\n\n", asstKies, asstKies * ASST_COOKIES);
+	printf("\t\t\t          ORDER TOTAL\t     :\tRM%9.2f\n", subTotal);
+
+	fprintf(receiptPTR, "============================================================================\n");
+	fprintf(receiptPTR, "TARUC FESTIVE COOKIES SDN BHD\t\tPhone     :\n");
+	fprintf(receiptPTR, "\tORDER NOTE");
+	fprintf(receiptPTR, buffer);
+	fprintf(receiptPTR, "Your Order No is:	%d\t\tReady in 4 days.\n", 1);
+	fprintf(receiptPTR, "%2d   LOVE LETTERS @ RM25.00 per tin: RM%9.2f\n", luvLetter, luvLetter * LUV_LETTER);
+	fprintf(receiptPTR, "%2d    NUT COOKIES @ RM20.00 per tin: RM%9.2f\n", nutKies, nutKies * NUT_COOKIES);
+	fprintf(receiptPTR, "%2d   ASST COOKIES @ RM15.00 per tin: RM%9.2f\n\n", asstKies, asstKies * ASST_COOKIES);
+	fprintf(receiptPTR, "\t\t\t          ORDER TOTAL\t     :\tRM%9.2f\n", subTotal);
+
+	if (subTotal >= 500 && subTotal <= 1000) {
+		discountedPrice = subTotal * discountI;
+		printf("\t\t\t          DISCOUNT (5%%)\t     :\tRM%9.2f\n", discountedPrice);
+		fprintf(receiptPTR, "\t\t\t          DISCOUNT (5%%)\t     :\tRM%9.2f\n", discountedPrice);
+	}
+	else if (subTotal > 1000) {
+		discountedPrice = subTotal * discountII;
+		printf("\t\t\t          DISCOUNT (10%%)     :\tRM%9.2f\n", discountedPrice);
+		fprintf(receiptPTR, "\t\t\t          DISCOUNT (10%%)     :\tRM%9.2f\n", discountedPrice);
+	}
+	else {
+		discountedPrice = 0.00;
+		printf("\t\t\t          DISCOUNT (0%%)\t     :\tRM%9.2f\n", discountedPrice);
+		fprintf(receiptPTR, "\t\t\t          DISCOUNT (0%%)\t     :\tRM%9.2f\n", discountedPrice);
+	}
+
+	amountToPay = subTotal - discountedPrice;
+	printf("\t\t\t          AMOUNT TO PAY\t     :\tRM%9.2f\n", amountToPay);
+	fprintf(receiptPTR, "\t\t\t          AMOUNT TO PAY\t     :\tRM%9.2f\n", amountToPay);
+	printf("\t\t\t           DEPOSIT PAID\t     :\tRM%9.2f\n", deposit);
+	fprintf(receiptPTR, "\t\t\t           DEPOSIT PAID\t     :\tRM%9.2f\n", deposit);
+	grandTotal = amountToPay - deposit;
+	printf("\t\t\t                BALANCE\t     :\tRM%9.2f\n", grandTotal);
+	fprintf(receiptPTR, "\t\t\t                BALANCE\t     :\tRM%9.2f\n", grandTotal);
+	thankYouMsg(&receiptPTR);
+	fclose(receiptPTR);
+}
+
+void summaryReport(int orderNumber, int luvLetter, int nutKies, int asstKies, float totalSales, float totalDiscount, float totalNetSales, float totalDeposit, float totalBalance) {
+	time_t rawtime;
+	struct tm* timeinfo;
+	char buffer[80];
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+	strftime(buffer, 80, "(%d %b %Y)\n", timeinfo);
+	printf("\t\t\tORDER SUMMARY FOR TODAY ");
+	printf(buffer);
+	printf("\t\t\t=====================================\n");
+	printf("Total Number of Customer Orders : %d\n", orderNumber);
+	printf("\tTotal Orders\t\t\tUnit Price\t    Amount \n");
+	printf("\t%2d LOVE LETTERS\t\t@ RM 25.00 per tin  :  RM%9.2f\n", luvLetter, luvLetter * LUV_LETTER);
+	printf("\t%2d NUT COOKIES\t\t@ RM 20.00 per jar  :  RM%9.2f\n", nutKies, nutKies * NUT_COOKIES);
+	printf("\t%2d ASST COOKIES\t\t@ RM 15.00 per jar  :  RM%9.2f\n", asstKies, asstKies * ASST_COOKIES);
+	printf("\t\t\t\t\t\t       -----------\n");
+	printf("\t\t\t\tTOTAL SALES\t    :  RM%9.2f\n", totalSales);
+	printf("\t\t\t\tTOTAL DISCOUNTS\t    :  RM%9.2f\n", totalDiscount);
+	printf("\t\t\t\t\t\t       -----------\n");
+	printf("\t\t\t\tTOTAL NET SALES     :  RM%9.2f\n", totalNetSales);
+	printf("\t\t\t\t\t\t       ===========\n");
+	printf("\t\t\t\tTOTAL DEPOSITS\t    :  RM%9.2f\n", totalDeposit);
+	printf("\t\t\t\tTOTAL BALANCE\t    :  RM%9.2f\n", totalBalance);
 }
 
 void mainMenu() {
@@ -105,29 +200,33 @@ void mainMenu() {
 
 void orderCookies() {
 	char userDecision, confirmation;
-	int quantity;
+	int quantity, luvLetter, nutKies, asstKies, totalLuv = 0, totalNut = 0, totalAsst = 0;
 	int orderNumber = 0;
-	float deposit, grandTotal;
+	float deposit, grandTotal, discountedPrice, amountToPay, totalSales = 0, totalDeposit = 0, totalDiscount = 0, totalBalance = 0, totalNetSales = 0;
 	float subTotal = 0, total = 0;
+
 	do {
 		orderNumber++;
-		printf("======================================================================\n");
+		printf("============================================================================\n");
 		printf("Order No: %d\n", orderNumber);
 		printf("\tItem\t\t\t  Quantity Required\n\n");
 		printf("LOVE LETTERS @ RM 25.00 per tin : ");
 		scanf("%d", &quantity);
+		luvLetter = quantity;
 		total = quantity * LUV_LETTER;
 		subTotal += total;
 		printf("\tLove Letter Order  = \t\t\t\tRM%9.2f\n", total);
 		printf("\tOrder SubTotal     = RM%.2f\n\n", subTotal);
 		printf("NUT COOKIES @ RM 20.00 per jar  : ");
 		scanf("%d", &quantity);
+		nutKies = quantity;
 		total = quantity * NUT_COOKIES;
 		subTotal += total;
 		printf("\tNut Cookies Order  = \t\t\t\tRM%9.2f\n", total);
 		printf("\tOrder SubTotal     = RM%.2f\n\n", subTotal);
 		printf("ASST COOKIES @ RM 15.00 per jar : ");
 		scanf("%d", &quantity);
+		asstKies = quantity;
 		total = quantity * ASST_COOKIES;
 		subTotal += total;
 		printf("\tAsst Cookies Order = \t\t\t\tRM%9.2f\n", total);
@@ -144,34 +243,48 @@ void orderCookies() {
 		}
 
 		if (toupper(confirmation) == 'Y') {
-			printf("\t\t\t          DISCOUNT (0%)\t     :\tRM%9.2f\n", 0.00);
-			printf("\t\t\t          AMOUNT TO PAY\t     :\tRM%9.2f\n", subTotal);
+			if (subTotal >= 500 && subTotal <= 1000) {
+				discountedPrice = subTotal * discountI;
+				printf("\t\t\t          DISCOUNT (5%%)\t     :\tRM%9.2f\n", discountedPrice);
+
+			}
+			else if (subTotal > 1000) {
+				discountedPrice = subTotal * discountII;
+				printf("\t\t\t          DISCOUNT (10%%)     :\tRM%9.2f\n", discountedPrice);
+
+			}
+			else {
+				discountedPrice = 0.00;
+				printf("\t\t\t          DISCOUNT (0%%)\t     :\tRM%9.2f\n", discountedPrice);
+			}
+
+			amountToPay = subTotal - discountedPrice;
+			printf("\t\t\t          AMOUNT TO PAY\t     :\tRM%9.2f\n", amountToPay);
 			printf("\t\t\t                DEPOSIT\t     :\tRM   ");
 			scanf("%f", &deposit);
 			printf("\t\t\t           DEPOSIT PAID\t     :\tRM%9.2f\n", deposit);
-			grandTotal = subTotal - deposit;
+			grandTotal = amountToPay - deposit;
 			printf("\t\t\t                BALANCE\t     :\tRM%9.2f\n", grandTotal);
-			thankYouMsg();
+			totalDeposit += deposit, totalAsst += asstKies, totalLuv += luvLetter, totalBalance += grandTotal, totalNetSales += amountToPay, totalDiscount += discountedPrice, totalNut += nutKies;
+			receipt(orderNumber, luvLetter, nutKies, asstKies, subTotal, discountedPrice, amountToPay, deposit, grandTotal);
 		}
 
-		else {
-			endingScreenMsg();
-			exit(0);
+		else if (toupper(confirmation) == 'N') {
+			system("cls");
+			deposit = 0, grandTotal = 0, subTotal = 0, total = 0, quantity = 0, discountedPrice = 0, amountToPay = 0;
 		}
 
 		printf("Next Order (Y = Yes)? ");
 		rewind(stdin);
 		scanf("%c", &userDecision);
 		if (toupper(userDecision) == 'Y') {
-			deposit = 0, grandTotal = 0, subTotal = 0, total = 0, quantity = 0;
-		}
-		else {
-			
+			deposit = 0, grandTotal = 0, subTotal = 0, total = 0, quantity = 0, discountedPrice = 0, amountToPay = 0;
 		}
 
 	} while (userDecision != toupper('N'));
-
+	summaryReport(orderNumber, totalLuv, totalNut, totalAsst, totalSales, totalDiscount, totalNetSales, totalDeposit, totalBalance);
 }
+
 
 void menu() {
 	int invalidCounter = 0, selection;
@@ -205,7 +318,7 @@ void menu() {
 	} while (invalidCounter != 0);
 
 	switch (selection) {
-	case 1: 
+	case 1:
 		mainMenu();
 		break;
 	case 2:
