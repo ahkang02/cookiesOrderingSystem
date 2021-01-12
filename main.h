@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <ctype.h>
+#include <stdbool.h>
 #pragma warning (disable:4996)
 #define LUV_LETTER 25.00
 #define NUT_COOKIES 20.00
@@ -201,40 +202,75 @@ void mainMenu() {
 void orderCookies() {
 	char userDecision, confirmation;
 	int quantity, luvLetter, nutKies, asstKies, totalLuv = 0, totalNut = 0, totalAsst = 0;
-	int orderNumber = 0;
+	int orderNumber = 0, validate = 0, invalidCounter;
 	float deposit, grandTotal, discountedPrice, amountToPay, totalSales = 0, totalDeposit = 0, totalDiscount = 0, totalBalance = 0, totalNetSales = 0;
 	float subTotal = 0, total = 0;
 
 	do {
 		orderNumber++;
-		printf("============================================================================\n");
-		printf("Order No: %d\n", orderNumber);
-		printf("\tItem\t\t\t  Quantity Required\n\n");
-		printf("LOVE LETTERS @ RM 25.00 per tin : ");
-		scanf("%d", &quantity);
-		luvLetter = quantity;
-		total = quantity * LUV_LETTER;
-		subTotal += total;
-		printf("\tLove Letter Order  = \t\t\t\tRM%9.2f\n", total);
-		printf("\tOrder SubTotal     = RM%.2f\n\n", subTotal);
-		printf("NUT COOKIES @ RM 20.00 per jar  : ");
-		scanf("%d", &quantity);
-		nutKies = quantity;
-		total = quantity * NUT_COOKIES;
-		subTotal += total;
-		printf("\tNut Cookies Order  = \t\t\t\tRM%9.2f\n", total);
-		printf("\tOrder SubTotal     = RM%.2f\n\n", subTotal);
-		printf("ASST COOKIES @ RM 15.00 per jar : ");
-		scanf("%d", &quantity);
-		asstKies = quantity;
-		total = quantity * ASST_COOKIES;
-		subTotal += total;
+		do {
+			invalidCounter = 0;
+			printf("============================================================================\n");
+			printf("Order No: %d\n", orderNumber);
+			printf("\tItem\t\t\t  Quantity Required\n\n");
+			printf("LOVE LETTERS @ RM 25.00 per tin : ");
+			rewind(stdin);
+			validate = scanf("%d", &quantity);
+			if (validate != 1) {
+				invalidCounter++;
+			}
+
+			luvLetter = quantity;
+			total = quantity * LUV_LETTER;
+			subTotal += total;
+			printf("\tLove Letter Order  = \t\t\t\tRM%9.2f\n", total);
+			printf("\tOrder SubTotal     = RM%.2f\n\n", subTotal);
+			printf("NUT COOKIES @ RM 20.00 per jar  : ");
+			rewind(stdin);
+			validate = scanf("%d", &quantity);
+			if (validate != 1) {
+				invalidCounter++;
+			}
+
+			nutKies = quantity;
+			total = quantity * NUT_COOKIES;
+			subTotal += total;
+			printf("\tNut Cookies Order  = \t\t\t\tRM%9.2f\n", total);
+			printf("\tOrder SubTotal     = RM%.2f\n\n", subTotal);
+			printf("ASST COOKIES @ RM 15.00 per jar : ");
+			rewind(stdin);
+
+			validate = scanf("%d", &quantity);
+			if (validate != 1) {
+				invalidCounter++;
+			}
+
+			asstKies = quantity;
+			total = quantity * ASST_COOKIES;
+			subTotal += total;
+
+			if (invalidCounter != 0) {
+				quantity = 0;
+				luvLetter = 0;
+				nutKies = 0;
+				asstKies = 0;
+				subTotal = 0;
+				total = 0;
+
+				printf("Please Enter Number Only\n");
+				system("pause");
+				system("cls");
+			}
+
+		} while (invalidCounter != 0);
+	
 		printf("\tAsst Cookies Order = \t\t\t\tRM%9.2f\n", total);
 		printf("\t\t\t\t\t\t\t-----------\n");
 		printf("\t\t\t          ORDER TOTAL\t     :\tRM%9.2f\n", subTotal);
 		printf("Confirm / Cancel Order (Y = Confirm)? ");
 		rewind(stdin);
 		scanf("%c", &confirmation);
+		
 
 		while (toupper(confirmation) != 'N' && toupper(confirmation) != 'Y') {
 			printf("Please Enter Y or N ONLY");
