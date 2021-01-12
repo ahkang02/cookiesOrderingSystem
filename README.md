@@ -8,7 +8,7 @@ The cookies ordering system is my school assignment, i decide to upload on GitHu
 Kindly copy and paste the code into your Visual Studio.
 
 # Features
-Date 
+Date
 Menu 
 Cookies Fact
 Cookies Menu
